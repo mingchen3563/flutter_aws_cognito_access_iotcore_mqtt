@@ -1,6 +1,6 @@
 name: flutter_aws_cognito_access_iotcore_mqtt
-description: "A new Flutter package project."
-version: 0.0.1
+description: "connect to aws iot core through mqtt web socket, with cognito authentication"
+version: 0.1.0
 homepage:
 
 environment:
@@ -16,8 +16,6 @@ dependencies:
   mqtt_client: ^10.5.1
   http: ^1.2.2
   get_it: ^8.0.3
- 
-
 
 
 dev_dependencies:
