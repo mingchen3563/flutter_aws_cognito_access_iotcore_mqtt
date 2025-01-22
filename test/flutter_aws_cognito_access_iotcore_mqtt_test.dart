@@ -6,7 +6,10 @@ import 'package:flutter_aws_cognito_access_iotcore_mqtt/src/application/usecase/
 
 import 'package:flutter_aws_cognito_access_iotcore_mqtt/src/application/usecase/mqtt_server_client_build_usecase.dart';
 import 'package:flutter_aws_cognito_access_iotcore_mqtt/src/application/usecase/unsubscribe_to_topic_usecase.dart';
+import 'package:flutter_aws_cognito_access_iotcore_mqtt/src/domain/repositories/aws_service_repository.dart';
+import 'package:flutter_aws_cognito_access_iotcore_mqtt/src/domain/repositories/mqtt_client_repository.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:get_it/get_it.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:mqtt_client/mqtt_client.dart';
@@ -75,96 +78,100 @@ void main() {
       disconnectUsecase: mockDisconnectUsecase,
     );
   });
-  test('test configure', () {
-    // arrange
-    final credentials = MqttClientCredentials(
-      accessKey: 'test-access-key',
-      secretKey: 'test-secret-key',
-      sessionToken: 'test-session-token',
-      identityId: 'test-identity-id',
-    );
-    final path = MqttClientPath(
-      endpoint: 'test-endpoint',
-      region: 'test-region',
-      policyName: 'test-policy-name',
-    );
-    final behavior = MqttClientBehavior.defaultBehavior();
-    final options = MqttClientOptions.defaultOptions();
-    // stub
-    when(mockMqttServerClientBuildUsecase.build(
-      credentials: credentials,
-      path: path,
-      behavior: behavior,
-      options: options,
-    )).thenReturn(MqttServerClient(
-      'server',
-      'test-client-id',
-    ));
-    // act
-    final instance = FlutterAwsCognitoAccessIotcoreMqtt.configure(
-      credentials: credentials,
-      path: path,
-      behavior: behavior,
-      options: options,
-      mqttServerClientBuildUsecase: mockMqttServerClientBuildUsecase,
-      connectUsecase: mockConnectUsecase,
-      subscribeToTopicUsecase: mockSubscribeToTopicUsecase,
-      publishToTopicUsecase: mockPublishToTopicUsecase,
-      unsubscribeToTopicUsecase: mockUnsubscribeToTopicUsecase,
-      disconnectUsecase: mockDisconnectUsecase,
-    );
 
-    // assert
-    expect(instance.behavior, behavior);
-    expect(instance.credentials, credentials);
-    expect(instance.path, path);
-    expect(instance.options, options);
-    expect(instance.client, isNotNull);
-    expect(instance.connectUsecase, mockConnectUsecase);
-    expect(instance.subscribeToTopicUsecase, mockSubscribeToTopicUsecase);
-    expect(instance.publishToTopicUsecase, mockPublishToTopicUsecase);
-    expect(instance.unsubscribeToTopicUsecase, mockUnsubscribeToTopicUsecase);
-    expect(instance.disconnectUsecase, mockDisconnectUsecase);
-  });
+  group('test injection', () {
+   
+    test('test configure', () {
+      // arrange
+      final credentials = MqttClientCredentials(
+        accessKey: 'test-access-key',
+        secretKey: 'test-secret-key',
+        sessionToken: 'test-session-token',
+        identityId: 'test-identity-id',
+      );
+      final path = MqttClientPath(
+        endpoint: 'test-endpoint',
+        region: 'test-region',
+        policyName: 'test-policy-name',
+      );
+      final behavior = MqttClientBehavior.defaultBehavior();
+      final options = MqttClientOptions.defaultOptions();
+      // stub
+      when(mockMqttServerClientBuildUsecase.build(
+        credentials: credentials,
+        path: path,
+        behavior: behavior,
+        options: options,
+      )).thenReturn(MqttServerClient(
+        'server',
+        'test-client-id',
+      ));
+      // act
+      final instance = FlutterAwsCognitoAccessIotcoreMqtt.configure(
+        credentials: credentials,
+        path: path,
+        behavior: behavior,
+        options: options,
+        mqttServerClientBuildUsecase: mockMqttServerClientBuildUsecase,
+        connectUsecase: mockConnectUsecase,
+        subscribeToTopicUsecase: mockSubscribeToTopicUsecase,
+        publishToTopicUsecase: mockPublishToTopicUsecase,
+        unsubscribeToTopicUsecase: mockUnsubscribeToTopicUsecase,
+        disconnectUsecase: mockDisconnectUsecase,
+      );
 
-  test('configure without passing mockusecases', () {
-    // arrange
-    final credentials = MqttClientCredentials(
-      accessKey: 'test-access-key',
-      secretKey: 'test-secret-key',
-      sessionToken: 'test-session-token',
-      identityId: 'test-identity-id',
-    );
-    final path = MqttClientPath(
-      endpoint: 'test-endpoint',
-      region: 'test-region',
-      policyName: 'test-policy-name',
-    );
-    final behavior = MqttClientBehavior.defaultBehavior();
-    final options = MqttClientOptions.defaultOptions();
-    // stub
-    when(mockMqttServerClientBuildUsecase.build(
-      credentials: credentials,
-      path: path,
-      behavior: behavior,
-      options: options,
-    )).thenReturn(MqttServerClient(
-      'server',
-      'test-client-id',
-    ));
-    // act
-    final instance = FlutterAwsCognitoAccessIotcoreMqtt.configure(
-      credentials: credentials,
-      path: path,
-      behavior: behavior,
-      options: options,
-    );
-    expect(instance.client, isNotNull);
-    expect(instance.connectUsecase, isNotNull);
-    expect(instance.subscribeToTopicUsecase, isNotNull);
-    expect(instance.publishToTopicUsecase, isNotNull);
-    expect(instance.unsubscribeToTopicUsecase, isNotNull);
-    expect(instance.disconnectUsecase, isNotNull);
+      // assert
+      expect(instance.behavior, behavior);
+      expect(instance.credentials, credentials);
+      expect(instance.path, path);
+      expect(instance.options, options);
+      expect(instance.client, isNotNull);
+      expect(instance.connectUsecase, mockConnectUsecase);
+      expect(instance.subscribeToTopicUsecase, mockSubscribeToTopicUsecase);
+      expect(instance.publishToTopicUsecase, mockPublishToTopicUsecase);
+      expect(instance.unsubscribeToTopicUsecase, mockUnsubscribeToTopicUsecase);
+      expect(instance.disconnectUsecase, mockDisconnectUsecase);
+    });
+
+    test('configure without passing mockusecases', () {
+      // arrange
+      final credentials = MqttClientCredentials(
+        accessKey: 'test-access-key',
+        secretKey: 'test-secret-key',
+        sessionToken: 'test-session-token',
+        identityId: 'test-identity-id',
+      );
+      final path = MqttClientPath(
+        endpoint: 'test-endpoint',
+        region: 'test-region',
+        policyName: 'test-policy-name',
+      );
+      final behavior = MqttClientBehavior.defaultBehavior();
+      final options = MqttClientOptions.defaultOptions();
+      // stub
+      when(mockMqttServerClientBuildUsecase.build(
+        credentials: credentials,
+        path: path,
+        behavior: behavior,
+        options: options,
+      )).thenReturn(MqttServerClient(
+        'server',
+        'test-client-id',
+      ));
+      // act
+      final instance = FlutterAwsCognitoAccessIotcoreMqtt.configure(
+        credentials: credentials,
+        path: path,
+        behavior: behavior,
+        options: options,
+      );
+      expect(instance.client, isNotNull);
+      expect(instance.connectUsecase, isNotNull);
+      expect(instance.subscribeToTopicUsecase, isNotNull);
+      expect(instance.publishToTopicUsecase, isNotNull);
+      expect(instance.unsubscribeToTopicUsecase, isNotNull);
+      expect(instance.disconnectUsecase, isNotNull);
+    });
   });
 
   test('test connect', () async {
