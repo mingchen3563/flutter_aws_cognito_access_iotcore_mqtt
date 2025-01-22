@@ -29,6 +29,9 @@ class MqttClientRepositoryImpl implements MqttClientRepository {
 
     if (builder.payload case var payload?) {
       final messageId = client.publishMessage(topic, qos, payload);
+      // clear the payload
+      builder.clear();
+
       return messageId;
     } else {
       throw Exception('Payload is null');
