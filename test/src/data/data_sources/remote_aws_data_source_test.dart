@@ -21,7 +21,6 @@ void main() {
   const identityId = 'testIdentityId';
   const region = 'ap-northeast-1';
   const policyName = 'testPolicy';
-  late MockAWSSigV4Signer mockAWSSigV4Signer;
   late MockAwsSignService mockAwsSignService;
   late MockClient mockHttpClient;
   late RemoteAwsDataSource remoteAwsDataSource;
@@ -30,7 +29,6 @@ void main() {
   late AWSCredentialScope credentialScope;
   late AWSSignedRequest signedRequest;
   setUpAll(() {
-    mockAWSSigV4Signer = MockAWSSigV4Signer();
     mockAwsSignService = MockAwsSignService();
     mockHttpClient = MockClient();
     remoteAwsDataSource = RemoteAwsDataSource(

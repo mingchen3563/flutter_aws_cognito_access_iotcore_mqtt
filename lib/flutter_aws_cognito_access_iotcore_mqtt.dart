@@ -1,5 +1,8 @@
 library flutter_aws_cognito_access_iotcore_mqtt;
 
+import 'dart:async';
+import 'dart:developer';
+
 import 'package:flutter_aws_cognito_access_iotcore_mqtt/src/application/usecase/connect_usecase.dart';
 import 'package:flutter_aws_cognito_access_iotcore_mqtt/src/application/usecase/disconnect_usecase.dart';
 import 'package:flutter_aws_cognito_access_iotcore_mqtt/src/application/usecase/mqtt_server_client_build_usecase.dart';
@@ -49,6 +52,9 @@ class FlutterAwsCognitoAccessIotcoreMqtt {
   });
 
   List<Subscription> subscriptions = [];
+  Map<String, StreamController<String>> updateStreamControllers = {};
+
+  Stream<List<MqttReceivedMessage<MqttMessage>>>? updateStream;
 
   static FlutterAwsCognitoAccessIotcoreMqtt configure({
     required MqttClientCredentials credentials,
@@ -108,12 +114,38 @@ class FlutterAwsCognitoAccessIotcoreMqtt {
     );
   }
 
-  Future<void> connect() {
-    return connectUsecase.call();
+  Future<void> connect() async {
+    await connectUsecase.call();
+    updateStream = client.updates;
+    client.updates?.listen((events) {
+      for (var event in events) {
+        var topic = event.topic;
+        var payload = event.payload as MqttPublishMessage;
+        var pt =
+            MqttPublishPayload.bytesToStringAsString(payload.payload.message);
+        StreamController<String>? controller = updateStreamControllers[topic];
+        if (controller != null) {
+          controller.add(pt);
+        }
+
+        log('incoming message from topic $topic\n${event.topic}: $pt');
+      }
+    });
   }
 
-  Subscription subscribeToTopic(String topic) {
-    return subscribeToTopicUsecase.subscribe(topic);
+  StreamController<String> subscribeToTopic(String topic) {
+    // if topic is already subscribed, return the controller
+    if (updateStreamControllers.containsKey(topic)) {
+      log('duplicate topic: $topic');
+      return updateStreamControllers[topic]!;
+    }
+    var s = subscribeToTopicUsecase.subscribe(topic);
+    // create a StreamController pushing String on triggered
+    subscriptions.add(s);
+
+    var controller = StreamController<String>();
+    updateStreamControllers.putIfAbsent(topic, () => controller);
+    return controller;
   }
 
   /// return a message id
@@ -129,7 +161,11 @@ class FlutterAwsCognitoAccessIotcoreMqtt {
     for (var subscription in subscriptions) {
       unsubscribeToTopicUsecase.unsubscribe(topic: subscription.topic.rawTopic);
     }
+    for (var controller in updateStreamControllers.entries) {
+      controller.value.close();
+    }
     subscriptions.clear();
+    updateStreamControllers.clear();
   }
 
   void disconnect() {
