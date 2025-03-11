@@ -13,7 +13,9 @@ class MqttClientRepositoryImpl implements MqttClientRepository {
             mqttClientPayloadBuilder ?? MqttClientPayloadBuilder();
   @override
   Future<bool> connect() async {
+    
     var result = await client.connect();
+
     return result?.state == MqttConnectionState.connected;
   }
 
