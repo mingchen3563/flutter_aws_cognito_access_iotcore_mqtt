@@ -68,7 +68,7 @@ class FlutterAwsCognitoAccessIotcoreMqtt {
     UnsubscribeToTopicUsecase? unsubscribeToTopicUsecase,
     DisconnectUsecase? disconnectUsecase,
   }) {
-    var client =
+    MqttServerClient client =
         (mqttServerClientBuildUsecase ?? MqttServerClientBuildUsecase()).build(
       credentials: credentials,
       path: path,
@@ -176,5 +176,6 @@ class FlutterAwsCognitoAccessIotcoreMqtt {
     unSubscribeAll();
     GetIt.I.unregister<MqttClient>();
     disconnect();
+    client.disconnect();
   }
 }

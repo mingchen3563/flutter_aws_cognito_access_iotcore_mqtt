@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'dart:io';
 
 import 'package:aws_common/aws_common.dart';
 import 'package:aws_signature_v4/aws_signature_v4.dart';
@@ -33,6 +34,7 @@ class MqttServerClientBuildUsecase {
       log('Failed to get signed url: $e', error: e, stackTrace: s);
       throw Exception('Failed to get signed url');
     }
+
     MqttServerClient client = MqttServerClient.withPort(
       signedUrl,
       credentials.identityId,
@@ -44,9 +46,9 @@ class MqttServerClientBuildUsecase {
     client.logging(on: false);
     client.useWebSocket = true;
     client.secure = false;
-    client.autoReconnect = true;
+    client.autoReconnect = false;
     client.disconnectOnNoResponsePeriod = options.disconnectOnNoResponsePeriod;
-    client.keepAlivePeriod = options.keepAlivePeriod;
+    // client.keepAlivePeriod = options.keepAlivePeriod;
 
     final MqttConnectMessage connMess =
         MqttConnectMessage().withClientIdentifier(credentials.identityId);
@@ -108,7 +110,6 @@ class MqttServerClientBuildUsecase {
     );
     var finalParams = signed.query;
     final result = '$scheme$endpoint$urlPath?$finalParams';
-    // log('socket url: $result');
     return result;
   }
 }
